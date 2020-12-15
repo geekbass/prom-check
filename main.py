@@ -1,3 +1,10 @@
+"""
+Script is used to check the /ready endpoint of prometheus to see if it is available or not. When the check fails a
+number of times in a row, specified by THRESHOLD, it will send an alert to Slack or PagerDuty that Prometheus is
+currently failing and that your monitoring system is not longer monitoring your environment. This is written to support
+Prometheus on Kubernetes.
+"""
+
 import os
 import requests
 import logging
