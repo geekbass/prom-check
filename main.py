@@ -53,7 +53,6 @@ def main():
         # If we are over threshold then its time to alert
         if len(threshold_counter) >= int(ALERT_THRESHOLD):
             logging.info("Threshold reached. Triggering Alert.")
-            # print("Threshold reached. Triggering Alert.")
             # TODO: trigger alert to slack or PD
 
             # Reset the threshold counter
@@ -67,4 +66,3 @@ if __name__ == '__main__':
     # Use threading to run Flask and main function
     threading.Thread(target=main).start()
     threading.Thread(target=healthz.app.run('0.0.0.0')).start()
-
