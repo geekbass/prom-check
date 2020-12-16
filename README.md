@@ -1,9 +1,9 @@
 # Prometheus Up Checker
 Ever wonder why alerts are all of a sudden so quiet? Is it because you are just a really awesome engineer? I'm sure you are awesome, but, being honest with ourselves here, likely this is because your monitoring system is down. Prometheus Up Checker is used to monitor your Prometheus service. Who is watching the watcher? A little something to monitor your monitoring system.
 
-Simple python loop that continuously checks the `/-/ready` endpoint of Prometheus to see if it is available or if it returns that it is Ready. The script will run a check at the specified `CHECK_INTERVAL` and if a failure is detected in the specified `ALERT_THRESHOLD` a message will be sent to Slack to notify the user to check on Prometheus. Once the message is sent The script will then pause for the specified `ALERT_SENT_PAUSE_INTERVAL` so that alerts will continue to be sent until it is resolved but not so much that it floods your alerting platform.
+Simple python loop that continuously checks the `/-/ready` endpoint of Prometheus to see if it is available or if it returns that it is Ready. The script will run a check at the specified `CHECK_INTERVAL` and if a failure is detected in the specified `ALERT_THRESHOLD` a message will be sent to Slack to notify the user to check on Prometheus. Once the message is sent the script will then pause for the specified `ALERT_SENT_PAUSE_INTERVAL` so that alerts will continue to be sent until it is resolved but not so much that it floods your alerting platform.
 
-There is a number of [environment variables](###environment-variables) with defaults if not specified. This gives greater flexibility so that this can be run either within Kubernetes, in Docker or standalone python script.
+There is a number of [environment variables](https://github.com/geekbass/prom-check#environment-variables) with defaults if not specified. This gives greater flexibility so that this can be run either within Kubernetes, in Docker or standalone python script.
 
 Currently, there is only support for alerting via Slack but there are plans to support other alerting/notification platforms as well such as PagerDuty.
 
@@ -11,6 +11,8 @@ Currently, there is only support for alerting via Slack but there are plans to s
 - Python 3.9+
 - Docker
 - Helm
+
+Check Docker repo for [latest tag](https://hub.docker.com/repository/docker/wbassler/prom-check).
 
 ### Usage
 Please see examples below but as mentioned this can be run as standalone python, in Docker or deployed to Kubernetes. 
@@ -98,4 +100,6 @@ docker run -d -e "PROMETHEUS_REQUEST_URL=prometheus:9090/-/ready" -e  "SLACK_WEB
 - [ ] helm chart
 - [ ] Docs
 - [ ] Allow for user to pass own Template data for Slack message
+- [ ] Tests
+- [ ] Build out some automation: docker builds, linting, etc...
 
