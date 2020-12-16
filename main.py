@@ -11,12 +11,15 @@ import logging
 import time
 import threading
 import healthz
+import slack
 
 # TODO: Constants to file?
-# We are passing ENV variables with defaults if they do not exist
+# We are passing ENV variables with defaults if they do not exist where possible
 ALERT_THRESHOLD = os.getenv("THRESHOLD", 5)
+ALERT_SENT_PAUSE_INTERVAL = os.getenv("ALERT_SENT_PAUSE_INTERVAL", 900)
 CHECK_INTERVAL = os.getenv("INTERVAL", 30)
 
+CLUSTER_NAME = os.getenv("CLUSTER_NAME", "Production")
 CONTAINER_NAME = os.getenv("CONTAINER_NAME", "prometheus")
 PROMETHEUS_SERVICE_NAME = os.getenv("PROMETHEUS_SERVICE_NAME", "prometheus-kubeaddons-prom-prometheus")
 PROMETHEUS_SERVICE_NS = os.getenv("PROMETHEUS_SERVICE_NS", "kubeaddons")
@@ -30,6 +33,8 @@ PROMETHEUS_REQUEST_URL = os.getenv("PROMETHEUS_REQUEST_URL", "{}://{}.{}.svc.{}:
     PROMETHEUS_SERVICE_DOMAIN,
     PROMETHEUS_SERVICE_PORT))
 
+SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")
+SLACK_CHANNEL = os.getenv("SLACK_CHANNEL")
 
 def main():
     log_format = "%(asctime)s - %(levelname)s - %(process)d/%(threadName)s - %(message)s"
@@ -60,10 +65,19 @@ def main():
         # If we are over threshold then its time to alert
         if len(threshold_counter) >= int(ALERT_THRESHOLD):
             logging.info("Threshold reached. Triggering Alert.")
-            # TODO: trigger alert to slack or PD
+            # TODO: Error handling for missing SLACK variables
+
+            # Create an alert
+            # TODO: Include additional Alerting platforms such as PagerDuty, etc...
+            slack.alert_slack(SLACK_WEBHOOK_URL, SLACK_CHANNEL, CLUSTER_NAME, CONTAINER_NAME, PROMETHEUS_SERVICE_NS)
 
             # Reset the threshold counter
             threshold_counter = []
+
+            # Pause for a few minutes again before starting checks again.
+            # This prevents blowing up a channel.
+            logging.info("Alert has been sent. Pausing before trying checks again.")
+            time.sleep()
 
         # Sleep before next check is run
         time.sleep(CHECK_INTERVAL)
