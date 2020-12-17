@@ -15,9 +15,9 @@ import slack
 
 # TODO: Constants to file?
 # We are passing ENV variables with defaults if they do not exist where possible
-ALERT_THRESHOLD = os.getenv("THRESHOLD", 5)
-ALERT_SENT_PAUSE_INTERVAL = os.getenv("ALERT_SENT_PAUSE_INTERVAL", 900)
-CHECK_INTERVAL = os.getenv("INTERVAL", 30)
+ALERT_THRESHOLD = os.getenv("ALERT_THRESHOLD", "5")
+ALERT_SENT_PAUSE_INTERVAL = os.getenv("ALERT_SENT_PAUSE_INTERVAL", "900")
+CHECK_INTERVAL = os.getenv("CHECK_INTERVAL", "30")
 
 CLUSTER_NAME = os.getenv("CLUSTER_NAME", "Production")
 CONTAINER_NAME = os.getenv("CONTAINER_NAME", "prometheus")
@@ -36,6 +36,7 @@ PROMETHEUS_REQUEST_URL = os.getenv("PROMETHEUS_REQUEST_URL", "{}://{}.{}.svc.{}:
 SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")
 SLACK_CHANNEL = os.getenv("SLACK_CHANNEL")
 
+
 def main():
     log_format = "%(asctime)s - %(levelname)s - %(process)d/%(threadName)s - %(message)s"
     logging.basicConfig(format=log_format, level=logging.INFO)
@@ -46,21 +47,32 @@ def main():
     threshold_counter = []
 
     while True:
-        # Get the response code for Prometheus
-        resp = requests.get("PROMETHEUS_REQUEST_URL").status_code
-
-        # Get the data from endpoint. Remove the new blank link and lower case all the things.
-        data = requests.get(PROMETHEUS_REQUEST_URL).text.lower().strip('\n')
-        # TODO: Add some error handling
-
-        # If we don't get response code 200, increase the threshold counter
-        if resp != 200 or "prometheus is ready" not in data:
-            threshold_counter.append(resp)
+        """
+        Requests will throw exceptions if the connection goes down at some point. We consider this as a failure
+        the threshold value without exiting.
+        """
+        try:
+            requests.get(PROMETHEUS_REQUEST_URL).status_code
+        except requests.exceptions.RequestException as e:
+            threshold_counter.append(e)
             logging.info("Could not reach {} {} times. Checking again in {} seconds.".format(
-                CONTAINER_NAME, len(threshold_counter), CHECK_INTERVAL))
+                CONTAINER_NAME, len(threshold_counter), int(CHECK_INTERVAL)))
+        # If no exception is received get the status code and/or response text.
         else:
-            logging.info("{} is up. Checking again in {} seconds.".format(
-                CONTAINER_NAME, CHECK_INTERVAL))
+            # Get the response code for Prometheus
+            resp = requests.get(PROMETHEUS_REQUEST_URL).status_code
+
+            # Get the data from endpoint. Remove the new blank link and lower case all the things.
+            data = requests.get(PROMETHEUS_REQUEST_URL).text.lower().strip('\n')
+
+            # If we don't get response code 200, increase the threshold counter
+            if resp != 200 or "prometheus is ready" not in data:
+                threshold_counter.append(resp)
+                logging.info("Could not reach {} {} times. Checking again in {} seconds.".format(
+                    CONTAINER_NAME, len(threshold_counter), int(CHECK_INTERVAL)))
+            else:
+                logging.info("{} is up. Checking again in {} seconds.".format(
+                    CONTAINER_NAME, int(CHECK_INTERVAL)))
 
         # If we are over threshold then its time to alert
         if len(threshold_counter) >= int(ALERT_THRESHOLD):
@@ -77,10 +89,10 @@ def main():
             # Pause for a few minutes again before starting checks again.
             # This prevents blowing up a channel.
             logging.info("Alert has been sent. Pausing before trying checks again.")
-            time.sleep()
+            time.sleep(int(ALERT_SENT_PAUSE_INTERVAL))
 
         # Sleep before next check is run
-        time.sleep(CHECK_INTERVAL)
+        time.sleep(int(CHECK_INTERVAL))
 
 
 if __name__ == '__main__':
