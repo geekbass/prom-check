@@ -15,8 +15,11 @@ def alert_slack(slack_webhook_url, channel, cluster_name, container, namespace):
 
     logging.info("Sending alert to Slack Channel {}.".format(channel))
 
-    # Define the body of the post call
-    # other values can be found https://api.slack.com/methods/chat.postMessage
+    """
+    Define the body of the post call
+    other values can be found https://api.slack.com/methods/chat.postMessage
+    """
+    # TODO: All for user to specify own data.
     data = {
         "channel": channel,
         "username": "PrometheusCheck",
