@@ -12,7 +12,7 @@ Currently, there is only support for alerting via Slack but there are plans to s
 - Docker
 - Helm
 
-Check Docker repo for [latest tag](https://hub.docker.com/repository/docker/wbassler/prom-check).
+Check Quay repo for [latest tag](https://quay.io/repository/geekbass/prom-check).
 
 ### Usage
 Please see examples below but as mentioned this can be run as standalone python, in Docker or deployed to Kubernetes. 
@@ -55,6 +55,14 @@ For Kubernetes use Helm.
 | `PROMETHEUS_SERVICE_PROTOCOL` | Protocol being using for ready endpoint (http or https). |    "http" |
 | `PROMETHEUS_REQUEST_URL` | The Full URL of the ready endpoint. Merges all of the above `PROMETHEUS_SERVICE_*` variables. Use this for the full URL of your Prometheus's Ready endpoint if you are NOT using Kubernetes or would like to bypass all other `PROMETHEUS_SERVICE_*` variables.  |    "http://prometheus-kubeaddons-prom-prometheus.kubeaddons.svc.cluster.local:9090/-/ready" |
 
+### Built-In Healthcheck
+For monitoring this service there is a built-in web endpoint healthcheck endpoint that can be found run at `0.0.0.0:5000/healthz`. If it is healthy, it will return `OK`. 
+
+```
+> curl http://0.0.0.0:5000/healthz
+OK
+```
+
 ### Building Docker Image
 
 ```
@@ -67,32 +75,9 @@ The slack alerting function is simply just a post to your [slack webhook URL](ht
 ![Slack](./images/slack.png)
 
 ### Deploying to Kubernetes
+`Coming Soon`
 
-
-### Usage Examples
-#### Standalone
-Standalone with checks every 60 seconds:
-```
-python3.9 -m venv venv
-source venv/bin/activate
-pip3 install -r requirements.txt
-export PROMETHEUS_REQUEST_URL=prometheus:9090/-/ready
-export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/BLAH/BLAHBLAH/SOMETEXT"
-export SLACK_CHANNEL="alerts"
-export CHECK_INTERVAL=60
-python3.9 main.py
-```
-
-#### Docker 
-Using Docker to check every 60 seconds with a label that supplies a link to the Prometheus development instance. If an alert is triggered it will provide a link to https://prometheus.development.com within the Slack message.
-```
-docker run -d -e "PROMETHEUS_REQUEST_URL=prometheus:9090/-/ready" -e  "SLACK_WEBHOOK_URL=https://hooks.slack.com/services/BLAH/BLAHBLAH/SOMETEXT" -e "SLACK_CHANNEL=alerts" \ 
- -e "CHECK_INTERVAL=60" -e "CLUSTER_NAME=https://prometheus.development.com" python-test:latest
-```
-
-#### Kubernetes
-
-`Coming soon.`
+### Try it out
 
 ### To Do:
 - [ ] Error Handling
@@ -102,4 +87,5 @@ docker run -d -e "PROMETHEUS_REQUEST_URL=prometheus:9090/-/ready" -e  "SLACK_WEB
 - [ ] Allow for user to pass own Template data for Slack message
 - [ ] Tests
 - [ ] Build out some automation: docker builds, linting, etc...
+- [ ] Add resolved Message to Slack?
 
