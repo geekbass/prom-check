@@ -3,7 +3,7 @@ version: '3.8'
 services:
   prometheus:
     container_name: prometheus
-    image: prom/prometheus
+    image: quay.io/prometheus/prometheus
     links:
       - prom-check
     ports:
