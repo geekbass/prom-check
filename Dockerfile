@@ -1,8 +1,6 @@
 FROM python:3.9
 LABEL maintainer="wbassler23@gmail.com"
 COPY requirements.txt .
-COPY ./main.py ./main.py
-COPY ./healthz.py ./healthz.py
-COPY ./slack.py ./slack.py
+COPY ./src ./src
 RUN pip install -r requirements.txt
-CMD [ "python", "-u", "./main.py" ]
+CMD [ "python", "-u", "./src/main.py" ]
