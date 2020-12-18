@@ -34,7 +34,7 @@ python3.9 main.py
 
 For Docker pass in the env variables via `-e`.
 ```
-docker run -d -e "PROMETHEUS_REQUEST_URL=prometheus:9090/-/ready" -e  "SLACK_WEBHOOK_URL=https://hooks.slack.com/services/BLAH/BLAHBLAH/SOMETEXT" -e "SLACK_CHANNEL=alerts" python-test:latest
+docker run -d -e "PROMETHEUS_REQUEST_URL=prometheus:9090/-/ready" -e  "SLACK_WEBHOOK_URL=https://hooks.slack.com/services/BLAH/BLAHBLAH/SOMETEXT" -e "SLACK_CHANNEL=alerts" quay.io/geekbass/prom-check:$TAG
 ```
 
 For Kubernetes use Helm.
