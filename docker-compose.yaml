@@ -1,13 +1,16 @@
-version: '3.7'
+version: '3.8'
 
 services:
   prometheus:
+    container_name: prometheus
     image: prom/prometheus
+    links:
+      - prom-check
     ports:
       - 9090:9090
-    restart: never
   prom-check:
-    image: quay.io/geekbass/prom-check
+    container_name: prom-check
+    image: quay.io/geekbass/prom-check:0.0.3
     ports:
       - 5000:5000
     env_file:
